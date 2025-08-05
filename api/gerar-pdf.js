@@ -1,20 +1,25 @@
-const express = require('express');
 const puppeteer = require('puppeteer');
 const ejs = require('ejs');
 const path = require('path');
-const cors = require('cors');
 const fs = require('fs');
 
-const app = express();
+// Função principal da API para Vercel
+module.exports = async (req, res) => {
+  // Configura CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-// Middlewares
-app.use(cors());
-app.use(express.json());
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, '..', 'backend', 'views'));
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
 
-// Rota para gerar PDF
-app.post('/api/gerar-pdf', async (req, res) => {
+  // Só aceita POST
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
   const formData = req.body;
 
   try {
@@ -34,18 +39,24 @@ app.post('/api/gerar-pdf', async (req, res) => {
     };
 
     // Renderiza o template EJS
-    const htmlContent = await ejs.renderFile(
-      path.join(__dirname, '..', 'backend', 'views', 'receita-template.ejs'),
-      { data: templateData }
-    );
+    const templatePath = path.join(__dirname, '..', 'backend', 'views', 'receita-template.ejs');
+    const htmlContent = await ejs.renderFile(templatePath, { data: templateData });
 
-    // Inicia o Puppeteer
+    // Inicia o Puppeteer (configuração para Vercel)
     const browser = await puppeteer.launch({ 
-      headless: true, 
-      args: ['--no-sandbox', '--disable-setuid-sandbox'] 
+      headless: 'new',
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
+        '--disable-gpu'
+      ]
     });
+    
     const page = await browser.newPage();
-
     await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
 
     // Gera o PDF
@@ -62,14 +73,15 @@ app.post('/api/gerar-pdf', async (req, res) => {
 
     await browser.close();
 
-    res.contentType('application/pdf');
+    // Retorna o PDF
+    res.setHeader('Content-Type', 'application/pdf');
     res.send(pdfBuffer);
 
   } catch (error) {
     console.error('Erro ao gerar o PDF:', error);
-    res.status(500).send('Ocorreu um erro ao gerar o PDF.');
+    res.status(500).json({ 
+      error: 'Erro ao gerar o PDF', 
+      details: error.message 
+    });
   }
-});
-
-// Exporta para Vercel
-module.exports = app;
+};
