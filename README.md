@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Formulário de Receituário Médico
 
 Sistema para geração de receituários médicos com controle especial, desenvolvido com React (frontend) e Node.js/Express (backend).
@@ -62,3 +63,7 @@ Este projeto está configurado para deploy no Netlify com as seguintes configura
 ## Autor
 
 Gustavo - Desenvolvedor Full Stack
+=======
+# Autocomplete-form
+Aplicação que preenche modelo de formulário com informações digitalmente  e depois pode ser impresso
+>>>>>>> cecb071fa3b90d00e5f0b1af7e96fcb7930d2c74
