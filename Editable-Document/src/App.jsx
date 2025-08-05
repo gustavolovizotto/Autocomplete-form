@@ -10,7 +10,7 @@ function App() {
 
     try {
       // Faz a requisição para o nosso backend
-      const response = await fetch('http://localhost:4000/gerar-pdf', {
+      const response = await fetch('/api/gerar-pdf', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

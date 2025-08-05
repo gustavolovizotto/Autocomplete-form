@@ -1,0 +1,17 @@
+{
+  "name": "formulario-receituario-medico",
+  "version": "1.0.0",
+  "description": "Sistema para geração de receituários médicos",
+  "scripts": {
+    "build": "cd Editable-Document && npm install && npm run build",
+    "dev": "npm run dev:backend & npm run dev:frontend",
+    "dev:backend": "cd backend && npm install && npm start",
+    "dev:frontend": "cd Editable-Document && npm install && npm run dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gustavolovizotto/Autocomplete-form.git"
+  },
+  "author": "Gustavo Lovizotto",
+  "license": "MIT"
+}
