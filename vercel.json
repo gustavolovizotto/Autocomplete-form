@@ -1,31 +1,4 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "Editable-Document/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    },
-    {
-      "src": "backend/server.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/backend/server.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/Editable-Document/dist/$1"
-    }
-  ],
-  "functions": {
-    "backend/server.js": {
-      "maxDuration": 30
-    }
-  }
+  "buildCommand": "cd Editable-Document && npm install && npm run build",
+  "outputDirectory": "Editable-Document/dist"
 }
