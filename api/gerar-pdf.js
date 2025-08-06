@@ -158,23 +158,39 @@ module.exports = async (req, res) => {
 
     // Inicia o Puppeteer (configuração para Vercel)
     console.log('🤖 Iniciando Puppeteer...');
+    console.log('🌍 Ambiente de produção:', isProduction);
     
     let browser;
     if (isProduction) {
       // Configuração para Vercel/produção com Chromium
+      console.log('🔧 Configurando Chromium para produção...');
+      
+      // Força configuração para Vercel
+      await chromium.font('https://raw.githack.com/googlei18n/noto-emoji/master/fonts/NotoColorEmoji.ttf');
+      
       browser = await puppeteer.launch({
         args: [
           ...chromium.args,
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
           '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--no-first-run',
+          '--no-zygote',
           '--disable-gpu',
-          '--single-process'
+          '--disable-extensions',
+          '--disable-background-timer-throttling',
+          '--disable-backgrounding-occluded-windows',
+          '--disable-renderer-backgrounding'
         ],
         defaultViewport: chromium.defaultViewport,
         executablePath: await chromium.executablePath(),
         headless: chromium.headless,
+        ignoreHTTPSErrors: true,
       });
     } else {
       // Configuração para desenvolvimento local
+      console.log('🔧 Configurando Puppeteer para desenvolvimento...');
       const puppeteerLocal = require('puppeteer');
       browser = await puppeteerLocal.launch({ 
         headless: 'new',
@@ -187,8 +203,24 @@ module.exports = async (req, res) => {
     const page = await browser.newPage();
     console.log('📄 Nova página criada');
     
-    await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
-    console.log('✅ Conteúdo definido na página');
+    // Configura timeout mais longo para CDN
+    await page.setDefaultTimeout(30000);
+    await page.setDefaultNavigationTimeout(30000);
+    
+    try {
+      await page.setContent(htmlContent, { 
+        waitUntil: ['domcontentloaded', 'networkidle0'],
+        timeout: 30000 
+      });
+      console.log('✅ Conteúdo definido na página');
+    } catch (contentError) {
+      console.log('⚠️ Erro no networkidle0, tentando com domcontentloaded...');
+      await page.setContent(htmlContent, { 
+        waitUntil: 'domcontentloaded',
+        timeout: 15000 
+      });
+      console.log('✅ Conteúdo definido na página (fallback)');
+    }
 
     // Gera o PDF
     console.log('📄 Gerando PDF...');
