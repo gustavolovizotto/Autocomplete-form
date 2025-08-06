@@ -82,6 +82,8 @@ app.post('/gerar-pdf', async (req, res) => {
   const formData = req.body; // Pega os dados do formulário enviados pelo React
 
   try {
+    console.log('📝 Recebendo dados do formulário:', formData);
+
     // Converte a imagem para Base64
     const logoPath = path.join(__dirname, 'public', 'images', 'logo.png');
     let logoBase64 = '';
@@ -89,6 +91,9 @@ app.post('/gerar-pdf', async (req, res) => {
     if (fs.existsSync(logoPath)) {
       const logoBuffer = fs.readFileSync(logoPath);
       logoBase64 = `data:image/png;base64,${logoBuffer.toString('base64')}`;
+      console.log('🖼️ Logo carregada com sucesso');
+    } else {
+      console.log('⚠️ Logo não encontrada no caminho:', logoPath);
     }
 
     // Adiciona a imagem em Base64 aos dados
@@ -97,23 +102,48 @@ app.post('/gerar-pdf', async (req, res) => {
       logoBase64: logoBase64
     };
 
+    console.log('🎨 Renderizando template EJS...');
     // Renderiza o template EJS com os dados do formulário
     const htmlContent = await ejs.renderFile(
       path.join(__dirname, 'views', 'receita-template.ejs'),
       { data: templateData }
     );
+    console.log('✅ Template renderizado com sucesso');
 
+    console.log('🚀 Iniciando Puppeteer...');
     // Inicia o Puppeteer com argumentos essenciais para ambientes de deploy
     const browser = await puppeteer.launch({ 
       headless: true, 
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'] 
+      args: [
+        '--no-sandbox', 
+        '--disable-setuid-sandbox', 
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
+        '--disable-gpu',
+        '--disable-extensions',
+        '--disable-background-timer-throttling',
+        '--disable-backgrounding-occluded-windows',
+        '--disable-renderer-backgrounding',
+        '--single-process'
+      ]
     });
+    console.log('✅ Puppeteer iniciado');
+
     const page = await browser.newPage();
+    console.log('📄 Nova página criada');
 
     // Define o conteúdo da página como o HTML renderizado
     // `waitUntil: 'networkidle0'` espera todas as conexões de rede (como o CSS do Tailwind) terminarem
-    await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+    console.log('🔄 Definindo conteúdo da página...');
+    await page.setContent(htmlContent, { 
+      waitUntil: 'domcontentloaded', // Mudança: usa domcontentloaded ao invés de networkidle0
+      timeout: 30000 
+    });
+    console.log('✅ Conteúdo definido na página');
 
+    console.log('📄 Gerando PDF...');
     // Gera o PDF
     const pdfBuffer = await page.pdf({
       format: 'A4',
@@ -125,16 +155,24 @@ app.post('/gerar-pdf', async (req, res) => {
         left: '10mm',
       },
     });
+    console.log('✅ PDF gerado com sucesso, tamanho:', pdfBuffer.length);
 
     await browser.close();
+    console.log('🔒 Browser fechado');
 
     // Envia o PDF de volta como resposta
     res.contentType('application/pdf');
     res.send(pdfBuffer);
+    console.log('📤 PDF enviado com sucesso');
 
   } catch (error) {
-    console.error('Erro ao gerar o PDF:', error);
-    res.status(500).send('Ocorreu um erro ao gerar o PDF.');
+    console.error('❌ Erro detalhado ao gerar o PDF:', error);
+    console.error('Stack trace:', error.stack);
+    res.status(500).json({ 
+      error: 'Erro ao gerar o PDF', 
+      details: error.message,
+      stack: error.stack 
+    });
   }
 });
 

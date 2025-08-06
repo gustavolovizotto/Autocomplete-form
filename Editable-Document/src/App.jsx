@@ -24,9 +24,20 @@ function App() {
 
       if (!response.ok) {
         console.error('Resposta não OK:', response.status, response.statusText);
-        const errorText = await response.text();
-        console.error('Texto da resposta de erro:', errorText);
-        throw new Error('Erro na resposta do servidor.');
+        
+        // Tenta pegar detalhes do erro
+        let errorDetails = '';
+        try {
+          const errorData = await response.json();
+          console.error('Dados do erro:', errorData);
+          errorDetails = errorData.details || errorData.error || response.statusText;
+        } catch {
+          const errorText = await response.text();
+          console.error('Texto da resposta de erro:', errorText);
+          errorDetails = errorText || response.statusText;
+        }
+        
+        throw new Error(`Erro ${response.status}: ${errorDetails}`);
       }
 
       console.log('✅ Resposta OK, processando PDF...');
