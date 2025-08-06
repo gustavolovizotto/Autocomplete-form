@@ -1,8 +1,8 @@
 {
   "dependencies": {
-    "puppeteer-core": "^21.0.0",
+    "puppeteer-core": "^19.11.1",
     "puppeteer": "^21.0.0",
     "ejs": "^3.1.9",
-    "@sparticuz/chromium": "^119.0.2"
+    "@sparticuz/chromium": "^116.0.0"
   }
 }
