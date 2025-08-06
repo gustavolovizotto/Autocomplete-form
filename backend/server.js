@@ -14,8 +14,16 @@ const frontendURL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 // Configuração do CORS mais robusta para produção
 app.use(cors({
-  origin: [frontendURL, 'http://localhost:5173', 'http://localhost:3000'],
-  credentials: true
+  origin: [
+    frontendURL, 
+    'http://localhost:5173', 
+    'http://localhost:3000',
+    'https://receituario-frontend.onrender.com'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 200
 }));
 
 // Middlewares
@@ -23,6 +31,51 @@ app.use(express.json()); // Permite que o express entenda JSON no corpo da requi
 app.set('view engine', 'ejs'); // Define EJS como o motor de visualização
 app.set('views', path.join(__dirname, 'views')); // Aponta para a pasta 'views'
 app.use(express.static('public'));
+
+// Middleware adicional para CORS (garantia extra)
+app.use((req, res, next) => {
+  const allowedOrigins = [
+    frontendURL,
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'https://receituario-frontend.onrender.com'
+  ];
+  
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+  
+  next();
+});
+
+// Rota de teste para verificar se o servidor está funcionando
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    message: 'Backend funcionando!', 
+    timestamp: new Date().toISOString(),
+    cors: {
+      frontendURL,
+      allowedOrigins: [
+        frontendURL,
+        'http://localhost:5173',
+        'http://localhost:3000',
+        'https://receituario-frontend.onrender.com'
+      ]
+    }
+  });
+});
 
 // Rota principal para gerar o PDF
 app.post('/gerar-pdf', async (req, res) => {
