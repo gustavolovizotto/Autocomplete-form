@@ -1,8 +1,18 @@
 services:
+  # Backend (Node.js API)
   - type: web
     name: receituario-backend
     runtime: node
     rootDir: backend
     buildCommand: npm install
     startCommand: node server.js
+    plan: free
+
+  # Frontend (React Static Site)
+  - type: web
+    name: receituario-frontend
+    runtime: static
+    rootDir: Editable-Document
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
     plan: free

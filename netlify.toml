@@ -1,0 +1,21 @@
+[build]
+  # Comando para build do frontend
+  command = "cd Editable-Document && npm install && npm run build"
+  # Diretório de saída do frontend
+  publish = "Editable-Document/dist"
+
+[functions]
+  # Diretório das functions serverless
+  directory = "netlify/functions"
+
+[[redirects]]
+  # API routes para as functions
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+[[redirects]]
+  # Redireciona todas as rotas para index.html (SPA)
+  from = "/*"
+  to = "/index.html"
+  status = 200
