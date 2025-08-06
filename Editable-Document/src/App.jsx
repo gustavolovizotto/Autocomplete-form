@@ -23,8 +23,13 @@ function App() {
       });
 
       if (!response.ok) {
+        console.error('Resposta não OK:', response.status, response.statusText);
+        const errorText = await response.text();
+        console.error('Texto da resposta de erro:', errorText);
         throw new Error('Erro na resposta do servidor.');
       }
+
+      console.log('✅ Resposta OK, processando PDF...');
 
       // Pega o PDF retornado como um "blob" (um tipo de dado de arquivo)
       const pdfBlob = await response.blob();

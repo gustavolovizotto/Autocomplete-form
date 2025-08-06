@@ -3,6 +3,9 @@ const ejs = require('ejs');
 
 // Serverless function para Vercel
 module.exports = async (req, res) => {
+  console.log('🔥 API chamada! Método:', req.method);
+  console.log('📦 Body recebido:', req.body);
+  
   // Configura CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -10,17 +13,22 @@ module.exports = async (req, res) => {
 
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('✅ Respondendo a preflight request');
     return res.status(200).end();
   }
 
   // Só aceita POST
   if (req.method !== 'POST') {
+    console.log('❌ Método não permitido:', req.method);
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   const formData = req.body;
+  console.log('📝 Dados do formulário processados:', formData);
 
   try {
+    console.log('🎨 Iniciando geração do template...');
+    
     // Para o Vercel, vamos incluir a imagem como base64 hardcoded
     // ou buscar de uma URL pública
     let logoBase64 = '';
@@ -30,6 +38,8 @@ module.exports = async (req, res) => {
       ...formData,
       logoBase64: logoBase64
     };
+
+    console.log('📋 Template data preparado');
 
     // Template EJS inline (já que o Vercel pode ter problemas com arquivos externos)
     const templateContent = `
@@ -138,9 +148,12 @@ module.exports = async (req, res) => {
 </html>`;
 
     // Renderiza o template EJS
+    console.log('🔄 Renderizando template EJS...');
     const htmlContent = ejs.render(templateContent, { data: templateData });
+    console.log('✅ Template renderizado com sucesso');
 
     // Inicia o Puppeteer (configuração para Vercel)
+    console.log('🤖 Iniciando Puppeteer...');
     const browser = await puppeteer.launch({ 
       headless: 'new',
       args: [
@@ -153,11 +166,16 @@ module.exports = async (req, res) => {
         '--disable-gpu'
       ]
     });
+    console.log('✅ Puppeteer iniciado');
     
     const page = await browser.newPage();
+    console.log('📄 Nova página criada');
+    
     await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+    console.log('✅ Conteúdo definido na página');
 
     // Gera o PDF
+    console.log('📄 Gerando PDF...');
     const pdfBuffer = await page.pdf({
       format: 'A4',
       printBackground: true,
@@ -168,18 +186,23 @@ module.exports = async (req, res) => {
         left: '10mm',
       },
     });
+    console.log('✅ PDF gerado com sucesso, tamanho:', pdfBuffer.length);
 
     await browser.close();
+    console.log('🔒 Browser fechado');
 
     // Retorna o PDF
+    console.log('📤 Enviando PDF como resposta');
     res.setHeader('Content-Type', 'application/pdf');
     res.send(pdfBuffer);
 
   } catch (error) {
-    console.error('Erro ao gerar o PDF:', error);
+    console.error('❌ Erro detalhado:', error);
+    console.error('Stack trace:', error.stack);
     res.status(500).json({ 
       error: 'Erro ao gerar o PDF', 
-      details: error.message 
+      details: error.message,
+      stack: error.stack 
     });
   }
 };
