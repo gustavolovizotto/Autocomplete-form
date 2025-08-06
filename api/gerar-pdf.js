@@ -1,10 +1,8 @@
 const puppeteer = require('puppeteer');
 const ejs = require('ejs');
-const path = require('path');
-const fs = require('fs');
 
 // Serverless function para Vercel
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
   // Configura CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -175,13 +173,13 @@ export default async function handler(req, res) {
 
     // Retorna o PDF
     res.setHeader('Content-Type', 'application/pdf');
-    return res.send(pdfBuffer);
+    res.send(pdfBuffer);
 
   } catch (error) {
     console.error('Erro ao gerar o PDF:', error);
-    return res.status(500).json({ 
+    res.status(500).json({ 
       error: 'Erro ao gerar o PDF', 
       details: error.message 
     });
   }
-}
+};
