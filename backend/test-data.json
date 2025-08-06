@@ -1,0 +1,13 @@
+{
+  "nomeMedico": "DRA. RITA DE CASSIA LOVIZOTTO",
+  "crm": "154792",
+  "crmUf": "SP",
+  "enderecoMedico": "RUA CARLOS GOMES, 592",
+  "cidadeMedico": "GUARARAPES",
+  "cidadeUf": "SP",
+  "telefoneMedico": "18 998160303",
+  "data": "05/08/2025",
+  "paciente": "TESTE",
+  "enderecoPaciente": "RUA TESTE",
+  "prescricao": "TESTE DE MEDICAMENTO"
+}

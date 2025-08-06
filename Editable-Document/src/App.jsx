@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import ReceitaForm from './components/ReceitaForm'; // O formulário continua o mesmo
+import { API_ENDPOINTS } from './config';
 
 function App() {
   const [isLoading, setIsLoading] = useState(false); // Estado para feedback de carregamento
@@ -9,8 +10,11 @@ function App() {
     setIsLoading(true); // Ativa o estado de carregamento
 
     try {
+      console.log('Fazendo requisição para:', API_ENDPOINTS.GERAR_PDF);
+      console.log('Dados enviados:', formData);
+      
       // Faz a requisição para o nosso backend
-      const response = await fetch('/api/gerar-pdf', {
+      const response = await fetch(API_ENDPOINTS.GERAR_PDF, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

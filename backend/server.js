@@ -16,7 +16,7 @@ app.set('views', path.join(__dirname, 'views')); // Aponta para a pasta 'views'
 app.use(express.static('public'));
 
 // Rota principal para gerar o PDF
-app.post('/api/gerar-pdf', async (req, res) => {
+app.post('/gerar-pdf', async (req, res) => {
   const formData = req.body; // Pega os dados do formulário enviados pelo React
 
   try {
