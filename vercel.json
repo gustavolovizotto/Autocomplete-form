@@ -1,6 +1,13 @@
 {
-  "buildCommand": "cd Editable-Document && npm install && npm run build",
-  "outputDirectory": "Editable-Document/dist",
+  "builds": [
+    {
+      "src": "Editable-Document/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
   "routes": [
     {
       "handle": "filesystem"
