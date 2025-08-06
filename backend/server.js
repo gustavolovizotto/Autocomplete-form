@@ -6,10 +6,19 @@ const cors = require('cors');
 const fs = require('fs');
 
 const app = express();
-const port = 4000;
+// O Render fornecerá a porta através de uma variável de ambiente
+const port = process.env.PORT || 4000;
+
+// A URL do seu frontend quando estiver no ar. Usaremos uma variável de ambiente
+const frontendURL = process.env.FRONTEND_URL || 'http://localhost:5173';
+
+// Configuração do CORS mais robusta para produção
+app.use(cors({
+  origin: [frontendURL, 'http://localhost:5173', 'http://localhost:3000'],
+  credentials: true
+}));
 
 // Middlewares
-app.use(cors()); // Permite requisições de outras origens (do nosso frontend)
 app.use(express.json()); // Permite que o express entenda JSON no corpo da requisição
 app.set('view engine', 'ejs'); // Define EJS como o motor de visualização
 app.set('views', path.join(__dirname, 'views')); // Aponta para a pasta 'views'
@@ -41,8 +50,11 @@ app.post('/gerar-pdf', async (req, res) => {
       { data: templateData }
     );
 
-    // Inicia o Puppeteer
-    const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
+    // Inicia o Puppeteer com argumentos essenciais para ambientes de deploy
+    const browser = await puppeteer.launch({ 
+      headless: true, 
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'] 
+    });
     const page = await browser.newPage();
 
     // Define o conteúdo da página como o HTML renderizado
@@ -75,6 +87,7 @@ app.post('/gerar-pdf', async (req, res) => {
 
 app.listen(port, () => {
   console.log(`Backend rodando em http://localhost:${port}`);
+  console.log(`Frontend configurado para: ${frontendURL}`);
 });
 
 // Exporta o app para o Vercel

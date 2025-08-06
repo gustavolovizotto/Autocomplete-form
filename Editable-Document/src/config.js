@@ -1,22 +1,16 @@
-// Detecta ambiente
-const isDevelopment = !import.meta.env.PROD;
-const isRenderFrontend = window.location.hostname.includes('onrender.com');
-
-let API_BASE_URL;
-
-if (isDevelopment) {
-  // Desenvolvimento local
-  API_BASE_URL = 'http://localhost:4000';
-} else if (isRenderFrontend) {
-  // Produção no Render (frontend + backend separados)
-  API_BASE_URL = 'https://receituario-backend.onrender.com';
-} else {
-  // Outros ambientes (Vercel, Netlify, etc.)
-  API_BASE_URL = '';
-}
+// Configuração robusta de API usando variáveis de ambiente
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
 export const API_ENDPOINTS = {
-  GERAR_PDF: `${API_BASE_URL}${(!isDevelopment && !isRenderFrontend) ? '/api' : ''}/gerar-pdf`
+  GERAR_PDF: `${API_BASE_URL}/gerar-pdf`
 };
+
+// Log para debug (apenas em desenvolvimento)
+if (import.meta.env.DEV) {
+  console.log('🔧 Configuração da API:', {
+    API_BASE_URL,
+    API_ENDPOINTS
+  });
+}
 
 export default API_ENDPOINTS;

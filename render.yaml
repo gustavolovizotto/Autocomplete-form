@@ -7,6 +7,11 @@ services:
     buildCommand: npm install
     startCommand: node server.js
     plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: FRONTEND_URL
+        value: https://receituario-frontend.onrender.com
 
   # Frontend (React Static Site)
   - type: web
@@ -14,5 +19,4 @@ services:
     runtime: static
     rootDir: Editable-Document
     buildCommand: npm install && npm run build
-    staticPublishPath: dist
     plan: free
