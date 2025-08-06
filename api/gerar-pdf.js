@@ -1,5 +1,4 @@
-const puppeteer = require('puppeteer-core');
-const chromium = require('@sparticuz/chromium');
+const chromium = require('chrome-aws-lambda');
 const ejs = require('ejs');
 
 // Configuração para diferentes ambientes
@@ -162,13 +161,13 @@ module.exports = async (req, res) => {
     
     let browser;
     if (isProduction) {
-      // Configuração para Vercel/produção com Chromium
-      console.log('🔧 Configurando Chromium para produção...');
+      // Configuração para Vercel/produção com chrome-aws-lambda
+      console.log('🔧 Configurando chrome-aws-lambda para produção...');
       
-      browser = await puppeteer.launch({
+      browser = await chromium.puppeteer.launch({
         args: chromium.args,
         defaultViewport: chromium.defaultViewport,
-        executablePath: await chromium.executablePath(),
+        executablePath: await chromium.executablePath,
         headless: chromium.headless,
         ignoreHTTPSErrors: true,
       });
