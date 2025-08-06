@@ -112,7 +112,7 @@ app.post('/gerar-pdf', async (req, res) => {
 
     console.log('🚀 Iniciando Puppeteer...');
     // Inicia o Puppeteer com argumentos essenciais para ambientes de deploy
-    const browser = await puppeteer.launch({ 
+    const puppeteerOptions = { 
       headless: true, 
       args: [
         '--no-sandbox', 
@@ -128,7 +128,16 @@ app.post('/gerar-pdf', async (req, res) => {
         '--disable-renderer-backgrounding',
         '--single-process'
       ]
-    });
+    };
+
+    // Se estiver no Render, especifica o caminho do executável do Chrome
+    if (process.env.RENDER || process.env.NODE_ENV === 'production') {
+      console.log('🔧 Configurando para ambiente Render...');
+      // Puppeteer vai procurar o Chrome no cache configurado
+      puppeteerOptions.executablePath = puppeteer.executablePath();
+    }
+
+    const browser = await puppeteer.launch(puppeteerOptions);
     console.log('✅ Puppeteer iniciado');
 
     const page = await browser.newPage();
