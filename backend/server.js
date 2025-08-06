@@ -111,6 +111,13 @@ app.post('/gerar-pdf', async (req, res) => {
     console.log('✅ Template renderizado com sucesso');
 
     console.log('🚀 Iniciando Puppeteer...');
+    console.log('🌍 Environment variables:', {
+      NODE_ENV: process.env.NODE_ENV,
+      FRONTEND_URL: process.env.FRONTEND_URL,
+      RENDER: process.env.RENDER,
+      PUPPETEER_CACHE_DIR: process.env.PUPPETEER_CACHE_DIR
+    });
+
     // Inicia o Puppeteer com argumentos essenciais para ambientes de deploy
     const puppeteerOptions = { 
       headless: true, 
@@ -130,11 +137,14 @@ app.post('/gerar-pdf', async (req, res) => {
       ]
     };
 
-    // Se estiver no Render, especifica o caminho do executável do Chrome
-    if (process.env.RENDER || process.env.NODE_ENV === 'production') {
-      console.log('🔧 Configurando para ambiente Render...');
-      // Puppeteer vai procurar o Chrome no cache configurado
-      puppeteerOptions.executablePath = puppeteer.executablePath();
+    console.log('🔧 Configuração Puppeteer:', puppeteerOptions);
+    
+    try {
+      console.log('🔍 Tentando localizar Chrome...');
+      const executablePath = puppeteer.executablePath();
+      console.log('📍 Caminho do executável encontrado:', executablePath);
+    } catch (error) {
+      console.log('⚠️ Não foi possível encontrar caminho padrão:', error.message);
     }
 
     const browser = await puppeteer.launch(puppeteerOptions);
