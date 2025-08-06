@@ -1,5 +1,9 @@
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
+const chromium = require('@sparticuz/chromium');
 const ejs = require('ejs');
+
+// Configuração para diferentes ambientes
+const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL;
 
 // Serverless function para Vercel
 module.exports = async (req, res) => {
@@ -154,18 +158,30 @@ module.exports = async (req, res) => {
 
     // Inicia o Puppeteer (configuração para Vercel)
     console.log('🤖 Iniciando Puppeteer...');
-    const browser = await puppeteer.launch({ 
-      headless: 'new',
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--no-first-run',
-        '--no-zygote',
-        '--disable-gpu'
-      ]
-    });
+    
+    let browser;
+    if (isProduction) {
+      // Configuração para Vercel/produção com Chromium
+      browser = await puppeteer.launch({
+        args: [
+          ...chromium.args,
+          '--disable-dev-shm-usage',
+          '--disable-gpu',
+          '--single-process'
+        ],
+        defaultViewport: chromium.defaultViewport,
+        executablePath: await chromium.executablePath(),
+        headless: chromium.headless,
+      });
+    } else {
+      // Configuração para desenvolvimento local
+      const puppeteerLocal = require('puppeteer');
+      browser = await puppeteerLocal.launch({ 
+        headless: 'new',
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      });
+    }
+    
     console.log('✅ Puppeteer iniciado');
     
     const page = await browser.newPage();
