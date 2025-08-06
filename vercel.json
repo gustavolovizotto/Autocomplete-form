@@ -1,4 +1,13 @@
 {
   "buildCommand": "cd Editable-Document && npm install && npm run build",
-  "outputDirectory": "Editable-Document/dist"
+  "outputDirectory": "Editable-Document/dist",
+  "routes": [
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
 }
