@@ -111,13 +111,6 @@ app.post('/gerar-pdf', async (req, res) => {
     console.log('✅ Template renderizado com sucesso');
 
     console.log('🚀 Iniciando Puppeteer...');
-    console.log('🌍 Environment variables:', {
-      NODE_ENV: process.env.NODE_ENV,
-      FRONTEND_URL: process.env.FRONTEND_URL,
-      RENDER: process.env.RENDER,
-      PUPPETEER_CACHE_DIR: process.env.PUPPETEER_CACHE_DIR
-    });
-
     // Inicia o Puppeteer com argumentos essenciais para ambientes de deploy
     const puppeteerOptions = { 
       headless: true, 
@@ -137,15 +130,29 @@ app.post('/gerar-pdf', async (req, res) => {
       ]
     };
 
-    console.log('🔧 Configuração Puppeteer:', puppeteerOptions);
-    
-    try {
-      console.log('🔍 Tentando localizar Chrome...');
-      const executablePath = puppeteer.executablePath();
-      console.log('📍 Caminho do executável encontrado:', executablePath);
-    } catch (error) {
-      console.log('⚠️ Não foi possível encontrar caminho padrão:', error.message);
+    // Se estiver no Render, usa variável de ambiente ou tenta encontrar o Chrome
+    if (process.env.RENDER || process.env.NODE_ENV === 'production') {
+      console.log('🔧 Configurando para ambiente Render...');
+      
+      if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+        console.log('📍 Usando caminho específico do Chrome:', process.env.PUPPETEER_EXECUTABLE_PATH);
+        puppeteerOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+      } else {
+        console.log('🔍 Tentando encontrar Chrome automaticamente...');
+        try {
+          // Tenta usar o caminho padrão do Puppeteer
+          puppeteerOptions.executablePath = puppeteer.executablePath();
+        } catch (error) {
+          console.log('⚠️ Não conseguiu encontrar Chrome, tentando sem executablePath...');
+          // Remove executablePath para deixar Puppeteer tentar encontrar automaticamente
+        }
+      }
     }
+
+    console.log('🎯 Configurações finais do Puppeteer:', {
+      executablePath: puppeteerOptions.executablePath,
+      args: puppeteerOptions.args.slice(0, 5) // só primeiros 5 args para não poluir log
+    });
 
     const browser = await puppeteer.launch(puppeteerOptions);
     console.log('✅ Puppeteer iniciado');

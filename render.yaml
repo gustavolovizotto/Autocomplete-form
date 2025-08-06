@@ -4,7 +4,7 @@ services:
     name: receituario-backend
     runtime: node
     rootDir: backend
-    buildCommand: npm install && npx puppeteer browsers install chrome
+    buildCommand: npm install && npx puppeteer browsers install chrome --path /opt/render/.cache/puppeteer
     startCommand: node server.js
     plan: free
     envVars:
@@ -12,6 +12,16 @@ services:
         value: production
       - key: FRONTEND_URL
         value: https://receituario-frontend.onrender.com
+      - key: PUPPETEER_CACHE_DIR
+        value: /opt/render/.cache/puppeteer
+
+  # Frontend (React Static Site)
+  - type: web
+    name: receituario-frontend
+    runtime: static
+    rootDir: Editable-Document
+    buildCommand: npm install && npm run build
+    plan: free
 
   # Frontend (React Static Site)
   - type: web
