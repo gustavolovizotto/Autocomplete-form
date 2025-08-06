@@ -1,4 +1,10 @@
 {
   "buildCommand": "cd Editable-Document && npm install && npm run build",
-  "outputDirectory": "Editable-Document/dist"
+  "outputDirectory": "Editable-Document/dist",
+  "functions": {
+    "api/gerar-pdf.js": {
+      "runtime": "nodejs18.x",
+      "maxDuration": 30
+    }
+  }
 }
